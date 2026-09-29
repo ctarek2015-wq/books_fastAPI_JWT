@@ -8,6 +8,7 @@ from config.environment import JWT_SECRET
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 class UserModel(BaseModel):
 
     __tablename__ = "users"
@@ -16,6 +17,7 @@ class UserModel(BaseModel):
     username = Column(String, unique=True)  # Each username must be unique
     email = Column(String, unique=True)  # Each email must be unique
     password = Column(String, nullable=True)
+    reviews = relationship("ReviewModel", back_populates="user")
 
     def set_password(self, plain_txt_password: str):
         self.password = pwd_context.hash(plain_txt_password)
@@ -25,9 +27,10 @@ class UserModel(BaseModel):
 
     def generate_token(self):
         payload = {
-        "exp": datetime.now(timezone.utc) + timedelta(days=1),  # Expiration time (1 day)
-        "iat": datetime.now(timezone.utc),  # Issued at time
-        "sub": str(self.id),  # Subject - the user ID
+            "exp": datetime.now(timezone.utc)
+            + timedelta(days=1),  # Expiration time (1 day)
+            "iat": datetime.now(timezone.utc),  # Issued at time
+            "sub": str(self.id),  # Subject - the user ID
         }
 
         token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
